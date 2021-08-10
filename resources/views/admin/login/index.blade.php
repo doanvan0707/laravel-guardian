@@ -1,4 +1,7 @@
 @extends('layouts.index')
+@section('css')
+<link rel="stylesheet" href="{{ asset('admin/signin.css') }}">
+@endsection
 @section('content')
     @if(session('success'))
         <div class="alert alert-success">

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -32,7 +33,8 @@ class AuthController extends Controller
            'password' => 'required',
         ]);
         $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
+        $checkAdmin = User::where('email', $request->email)->first();
+        if (Auth::attempt($credentials) && $checkAdmin->is_admin == 1) {
                 return redirect()->route('dashboard')
                                 ->withSuccess('Signed in');
         }

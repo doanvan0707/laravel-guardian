@@ -17,40 +17,27 @@ trait QueryKit
      */
     public static function insertDuplicate(array $data, array $insertKeys, array $updateKeys)
     {
-        logger(__METHOD__);
-        logger($data);
-        logger($insertKeys);
-        logger($updateKeys);
         $model = new static;
         $query = "INSERT INTO {$model->getTable()} __INSERTKEYS__ VALUES __INSERTVALUES__ ON DUPLICATE KEY UPDATE __UPDATEVALUES__";
         $tmpInKeys = array_fill_keys($insertKeys, null);
         $tmpUpKeys = array_fill_keys($updateKeys, null);
-
-        logger('--------');
-        logger($model);
-        logger($query);
-        logger($tmpInKeys);
-        logger($tmpUpKeys);
 
         try {
             DB::beginTransaction();
             foreach ($data as $item) {
                 $insertValue = array_intersect_key($item, $tmpInKeys);
 
-                logger($insertValue);
                 $updateValue = implode(', ', array_map(
                     function ($v, $k) { return sprintf("`%s`='%s'", $k, $v); },
                     array_intersect_key($item, $tmpUpKeys),
                     $updateKeys
                 ));
-                logger($updateValue);
 
                 $statement = str_replace(
                     ['__INSERTKEYS__', '__INSERTVALUES__', '__UPDATEVALUES__'],
                     ["(`" . implode("`,`", $insertKeys) . "`)", "('" . implode("','", $insertValue) . "')", $updateValue],
                     $query
                 );
-                logger($statement);
                 DB::statement($statement);
             }
             DB::commit();
